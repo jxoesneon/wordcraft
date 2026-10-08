@@ -25,3 +25,8 @@ winresource = "0.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rfd = { workspace = true }
+
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/wordcraft", dest = "/usr/bin/wordcraft", mode = "755" }
+]
