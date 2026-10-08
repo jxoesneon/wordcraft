@@ -1,12 +1,71 @@
-//! Word menus.
+//! Menu bar items and accessible hierarchy generation.
 
-pub struct MenuCategory {
-    pub title: &'static str,
-    pub items: &'static [&'static str],
+use crate::command_reg::{CommandCategory, commands_by_category};
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct MenuItemDef {
+    pub label: String,
+    pub command_id: Option<&'static str>,
+    pub shortcut: Option<String>,
+    pub is_separator: bool,
+    pub children: Vec<MenuItemDef>,
 }
 
-pub const MENUS: &[MenuCategory] = &[
-    MenuCategory { title: "File", items: &["file.new", "file.open", "file.save"] },
-    MenuCategory { title: "Format", items: &["text.bold", "text.italic", "text.underline"] },
-    MenuCategory { title: "Insert", items: &["insert.page_break"] },
-];
+impl MenuItemDef {
+    pub fn action(label: impl Into<String>, command_id: &'static str, shortcut: Option<&str>) -> Self {
+        Self {
+            label: label.into(),
+            command_id: Some(command_id),
+            shortcut: shortcut.map(|s| s.to_string()),
+            is_separator: false,
+            children: Vec::new(),
+        }
+    }
+
+    pub fn separator() -> Self {
+        Self { label: String::new(), command_id: None, shortcut: None, is_separator: true, children: Vec::new() }
+    }
+}
+
+pub struct MenuCategoryDef {
+    pub category: CommandCategory,
+    pub title: &'static str,
+    pub items: Vec<MenuItemDef>,
+}
+
+pub fn generate_main_menu() -> Vec<MenuCategoryDef> {
+    vec![
+        MenuCategoryDef { category: CommandCategory::File, title: "File", items: build_category_items(CommandCategory::File) },
+        MenuCategoryDef { category: CommandCategory::Edit, title: "Edit", items: build_category_items(CommandCategory::Edit) },
+        MenuCategoryDef { category: CommandCategory::Insert, title: "Insert", items: build_category_items(CommandCategory::Insert) },
+        MenuCategoryDef { category: CommandCategory::Format, title: "Format", items: build_category_items(CommandCategory::Format) },
+        MenuCategoryDef { category: CommandCategory::Layout, title: "Layout", items: build_category_items(CommandCategory::Layout) },
+        MenuCategoryDef { category: CommandCategory::References, title: "References", items: build_category_items(CommandCategory::References) },
+        MenuCategoryDef { category: CommandCategory::Review, title: "Review", items: build_category_items(CommandCategory::Review) },
+        MenuCategoryDef { category: CommandCategory::View, title: "View", items: build_category_items(CommandCategory::View) },
+    ]
+}
+
+fn build_category_items(cat: CommandCategory) -> Vec<MenuItemDef> {
+    commands_by_category(cat).into_iter().map(|cmd| MenuItemDef::action(cmd.label, cmd.id, cmd.default_shortcut)).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_menu_generation_coverage() {
+        let menus = generate_main_menu();
+        assert_eq!(menus.len(), 8);
+        for m in menus {
+            assert!(!m.items.is_empty(), "Menu {} has no items", m.title);
+            for it in m.items {
+                if !it.is_separator {
+                    assert!(it.command_id.is_some());
+                    assert!(!it.label.is_empty());
+                }
+            }
+        }
+    }
+}

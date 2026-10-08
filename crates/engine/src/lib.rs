@@ -42,6 +42,42 @@ impl From<wordcraft_doc::DocError> for CmdError {
 
 pub type CmdResult = Result<Value, CmdError>;
 
+/// The application engine: documents, commands, undo history and view state.
+/// Named `Engine` so UIs (egui, Martensite, headless) refer to one type.
+pub type Engine = Session;
+
+/// Editing tool identity, in word-processor order. UI-agnostic so every
+/// front-end shares the canonical list; each UI maps it to its own
+/// presentation. Tools cover the non-typing interactions a document canvas
+/// offers: selection, inking (Draw tab), formatting and navigation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Tool {
+    /// Select text and objects (default pointer).
+    Select,
+    /// Text insertion caret.
+    Type,
+    /// Format Painter: pick up formatting, apply elsewhere.
+    FormatPainter,
+    /// Text highlight (Draw tab marker).
+    Highlighter,
+    /// Ink pen (Draw tab).
+    Pen,
+    /// Ink eraser (Draw tab).
+    Eraser,
+    /// Lasso select for ink strokes (Draw tab).
+    Lasso,
+    /// Picture crop.
+    Crop,
+    /// Draw table grid insertion.
+    DrawTable,
+    /// Comment anchor placement.
+    Comment,
+    /// Pan the page canvas.
+    Hand,
+    /// Zoom the page canvas.
+    Zoom,
+}
+
 /// A registered command.
 #[derive(Clone)]
 pub struct CommandSpec {

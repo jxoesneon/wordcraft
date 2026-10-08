@@ -5,7 +5,14 @@ edition.workspace = true
 license.workspace = true
 description = "Sovereign retained-mode word processing user interface for WordCraft powered by Martensite"
 
+[lints]
+workspace = true
+
 [dependencies]
+wordcraft-engine = { workspace = true }
+wordcraft-doc = { workspace = true }
+wordcraft-geom = { workspace = true }
+
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 tracing.workspace = true

@@ -28,13 +28,7 @@ impl DocumentState {
     pub fn new() -> Self {
         Self {
             title: "Untitled Document".to_string(),
-            style: TextStyle {
-                font_size: 11.0,
-                bold: false,
-                italic: false,
-                underline: false,
-                alignment: Alignment::Left,
-            },
+            style: TextStyle { font_size: 11.0, bold: false, italic: false, underline: false, alignment: Alignment::Left },
             word_count: 0,
             page_count: 1,
         }
@@ -47,6 +41,12 @@ impl DocumentState {
 
     pub fn set_font_size(&mut self, size: f32) {
         self.style.font_size = size.clamp(4.0, 144.0);
+    }
+}
+
+impl Default for DocumentState {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
